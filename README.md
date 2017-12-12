@@ -27,7 +27,7 @@ Training, validation and testing graphs should be the format of edge lists (undi
 >......
 
 ## Citing
-    @inproceedings{Wang2017PNR,
+    @inproceedings{Wang2017PNR,
     author = {Wang, Zhitao and Chen, Chengyao and Li, Wenjie},
     title = {Predictive Network Representation Learning for Link Prediction},
      booktitle = {Proceedings of the 40th International ACM SIGIR Conference on Research and Development in Information Retrieval},
