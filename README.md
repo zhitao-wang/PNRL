@@ -13,6 +13,13 @@ The code is only tested in the environment with following setting:
 &emsp;4. scikit-learn (0.16.1)  
 &emsp;5. networkx (1.10)  
 
+## Dataset
+All experimental datasets are public, you can find in the following links:
+&emsp; Facebook: J. McAuley and J. Leskovec. Learning to Discover Social Circles in Ego Networks. NIPS, 2012. https://snap.stanford.edu/data/egonets-Facebook.html
+&emsp; Email: R. Guimera, L. Danon, A. Diaz-Guilera, F. Giralt and A. Arenas, Physical Review E , vol. 68, 065103(R), (2003). http://deim.urv.cat/~alexandre.arenas/data/welcome.htm
+&emsp; U.S. Power Grid: D. J. Watts and S. H. Strogatz, Nature 393, 440-442 (1998). http://www-personal.umich.edu/~mejn/netdata/
+&emsp; Condensed matter collaborations: M. E. J. Newman, The structure of scientific collaboration networks, Proc. Natl. Acad. Sci. USA 98, 404-409 (2001). http://www-personal.umich.edu/~mejn/netdata/
+
 ## Citation
     @inproceedings{Wang2017PNR,
     author = {Wang, Zhitao and Chen, Chengyao and Li, Wenjie},
