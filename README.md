@@ -1,8 +1,7 @@
 # PNRL
-This repository provides a reference implementation of PNRL as described in the paper:
-
-Predictive Network Representation Learning for Link Prediction.
-Zhitao Wang, Chengyao Chen and Wenjie Li.
+This repository provides reference codes of PNRL as described in the paper:
+Predictive Network Representation Learning for Link Prediction.     
+Zhitao Wang, Chengyao Chen and Wenjie Li.       
 SIGIR, 2017.  (https://dl.acm.org/citation.cfm?id=3080692)
 
 ## Environment
