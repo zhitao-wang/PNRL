@@ -20,8 +20,14 @@ All experimental datasets are public, you can find in the following links:
 * **U.S. Power Grid**: D. J. Watts and S. H. Strogatz, Nature 393, 440-442 (1998). http://www-personal.umich.edu/~mejn/netdata/
 * **Condensed Matter Collaborations**: M. E. J. Newman, The structure of scientific collaboration networks, Proc. Natl. Acad. Sci. USA 98, 404-409 (2001). http://www-personal.umich.edu/~mejn/netdata/
 
-## Citation
-    @inproceedings{Wang2017PNR,
+## Data Format
+Training, validation and testing graphs should be the format of edge lists (undirected):
+>node1_id_int node2_id_int <weight_float, optional>
+>1 2 1.0
+>......
+
+## Citing
+    @inproceedings{Wang2017PNR,
     author = {Wang, Zhitao and Chen, Chengyao and Li, Wenjie},
     title = {Predictive Network Representation Learning for Link Prediction},
      booktitle = {Proceedings of the 40th International ACM SIGIR Conference on Research and Development in Information Retrieval},
