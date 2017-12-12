@@ -22,7 +22,7 @@ All experimental datasets are public, you can find in the following links:
 
 ## Data Format
 Training, validation and testing graphs should be the format of edge lists (undirected):
->node1_id_int node2_id_int <weight_float, optional>
+>node1_id node2_id <weight, optional>     
 >1 2 1.0
 >......
 
