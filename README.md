@@ -17,7 +17,8 @@ The code is only tested in the environment with following setting:
 All experimental datasets are public, you can find in the following links:
 * **Facebook**: J. McAuley and J. Leskovec. Learning to Discover Social Circles in Ego Networks. NIPS, 2012. https://snap.stanford.edu/data/egonets-Facebook.html
 * **Email**: R. Guimera, L. Danon, A. Diaz-Guilera, F. Giralt and A. Arenas, Physical Review E , vol. 68, 065103(R), (2003). http://deim.urv.cat/~alexandre.arenas/data/welcome.htm
-* **U.S. Power Grid**: D. J. Watts and S. H. Strogatz, Nature 393, 440-442 (1998). http://www-personal.umich.edu/~mejn/netdata/
+* **U.S. Power Grid**: D. J. Watts and S. H. Strogatz, Nature 393, 440-442 (1998).      
+http://www-personal.umich.edu/~mejn/netdata/
 * **Condensed Matter Collaborations**: M. E. J. Newman, The structure of scientific collaboration networks, Proc. Natl. Acad. Sci. USA 98, 404-409 (2001). http://www-personal.umich.edu/~mejn/netdata/
 
 ## Data Format
