@@ -27,6 +27,10 @@ Training, validation and testing graphs should be the format of edge lists (undi
 >1 2 1.0
 >......
 
+We regard the link prediction as binary classification, therefore the validation and testing graphs should have two files:
+* One for truly linked node-pair (Positive samples)
+* One for non-linked node-pair (Negative samples)
+
 ## Citing
     @inproceedings{Wang2017PNR,
     author = {Wang, Zhitao and Chen, Chengyao and Li, Wenjie},
