@@ -8,7 +8,7 @@ def load_training_graph(file, directed):
     else:
         return nx.read_edgelist(file, data=False)
 
-def read_valset(pos_file, neg_file, graph_index, V, directed=False):
+def read_valset(pos_file, neg_file, graph_index, directed=False):
     print('Creating Validation edges set...')
     if directed:
         pos_val = nx.read_edgelist(pos_file, data=False, create_using = nx.DiGraph())
@@ -77,12 +77,12 @@ def neighbor_set(G):
     print 'Finish creating neighbor set'
     return neighbor_set, non_neighbor_set
 
-def edge_sampling(neighbor_set, non_neighbor_set, graph_index, node, neg_table, num_neg):
-    if len(neighbor_set[node])==0:
-        return False
-    else:
-        linked = graph_index[random.choice(neighbor_set[node])]
-        nolinked = graph_index[random.choice(non_neighbor_set[node])]
-        source = graph_index[node]
-        neg = neg_sample(neg_table, num_neg)
-        return source, linked, nolinked, neg
+# def edge_sampling(neighbor_set, non_neighbor_set, graph_index, node, neg_table, num_neg):
+#     if len(neighbor_set[node])==0:
+#         return False
+#     else:
+#         linked = graph_index[random.choice(neighbor_set[node])]
+#         nolinked = graph_index[random.choice(non_neighbor_set[node])]
+#         source = graph_index[node]
+#         neg = neg_sample(neg_table, num_neg)
+#         return source, linked, nolinked, neg
