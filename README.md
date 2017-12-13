@@ -24,7 +24,7 @@ http://www-personal.umich.edu/~mejn/netdata/
 ## Data Format
 Training, validation and testing graphs should be the format of edge lists (undirected):
 >node1_id node2_id <weight, optional>     
->1 2 1.0
+>1 2 1.0        
 >......
 
 We regard the link prediction as binary classification, therefore the validation and testing graphs should have two files:
