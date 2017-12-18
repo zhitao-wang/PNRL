@@ -5,8 +5,8 @@ from sklearn.metrics import classification_report, roc_auc_score
 import random
 
 
-data = 'cdm/CDM'
-model_name = 'nv'
+data = 'example'
+model_name = 'deepwalk'
 for i in range(5):
 	i = str(i)
 	model = Word2Vec.load_word2vec_format('data/'+ data + '_' + model_name + '_' +i+'.embeddings', binary=False)
