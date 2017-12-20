@@ -21,7 +21,7 @@ All experimental datasets are public, you can find in the following links:
 http://www-personal.umich.edu/~mejn/netdata/
 * **Condensed Matter Collaborations**: M. E. J. Newman, The structure of scientific collaboration networks, Proc. Natl. Acad. Sci. USA 98, 404-409 (2001). http://www-personal.umich.edu/~mejn/netdata/
 
-## Data Format
+## Data Format and Split
 Training, validation and testing graphs should be the format of edge lists (undirected):
 >node1_id node2_id <weight, optional>     
 >1 2 1.0        
@@ -30,6 +30,11 @@ Training, validation and testing graphs should be the format of edge lists (undi
 We regard the link prediction as binary classification, therefore the validation and testing graphs should have two files:
 * One for truly linked node-pair (Positive samples)
 * One for non-linked node-pair (Negative samples)
+
+Given an original edge list data (total num: N\*L), we randomly split these edges into N parts with same size L. We also need to randomly sample L non-linked pairs for N times as negative testing samplings. Then we can repeat N times cross-test over the processed data, N-1 parts for training and 1 part for testing each time. 
+
+Particularly, DEEPWALK, LINE, NODE2VEC, PNRLC require to sample (N-1)\*L negative training samplings (the same size with positive training samplings) each time for classifier training. This is known as a Under-Sampling Strategy for imbanlance classification problem.
+
 
 ## Citing
     @inproceedings{Wang2017PNR,
