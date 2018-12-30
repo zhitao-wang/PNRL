@@ -1,24 +1,31 @@
 import numpy as np
+import math
 import random
 np.random.seed(13)
 from keras import backend as K
-from keras.models import Sequential, Graph, Model
-from keras.layers import Input, Embedding, LSTM, Dense, merge, Reshape, Activation
+from keras.models import Sequential, Model
+from keras.layers import Input, Embedding, LSTM, Dense, dot, concatenate, Reshape, Activation
 from keras.utils import np_utils
 from keras.utils.data_utils import get_file
-from keras.preprocessing.text import Tokenizer, base_filter
+from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import skipgrams,make_sampling_table
 from keras.optimizers import rmsprop, SGD, Adam
 from keras.regularizers import l2
+import networkx as nx
 from sklearn.metrics import classification_report, roc_auc_score
 import copy
+import gc
 from util import *
 
 class Config(object):
     """Model setting and data setting"""
-    train_graph_file = 'data/example-train.net' # training file
-    val_pos_file = 'data/example-val-pos.net' # validation positive file
-    val_neg_file = 'data/example-val-neg.net' # validation negative file
+    data_path = 'data/'
+    data_name = 'example2'
+    train_graph_file = data_path + data_name + '-train.net' # training file
+    val_pos_file = data_path + data_name + '-val-pos.net' # validation positive file
+    val_neg_file = data_path + data_name + '-val-neg.net' # validation negative file
+    test_pos_file = data_path + data_name + '-test-pos.net' # validation positive file
+    test_neg_file = data_path + data_name + '-test-neg.net' # validation negative file
 
     batch_size = 256
     neg_sample_num = 5 # max negative sampling
@@ -27,6 +34,8 @@ class Config(object):
     hi_sample_beta = 0.2
     max_sample_iter = int(1/hi_sample_beta) # max iterations for hidden edge sample
     max_train_iter = 250
+
+    p_threshold = 100
 
 
 def ranking_loss_bpr(y_true, y_pred):
@@ -47,11 +56,21 @@ def ranking_loss_mse(y_true, y_pred):
     loss = (1/2)*K.square(pos-neg-1)
     return K.mean(loss) + 0 * y_true
 
+# def link_prediction(model, user_pair):
+#     u1 = user_pair[0]
+#     u2 = user_pair[1]
+#     W = model.layers[5].get_weights()[0]
+#     X = model.layers[3].get_weights()[0]
+#     x = X[u1]
+#     y = X[u2]
+#     xW = np.dot(x,W)
+#     xWy = np.sum(xW*y, axis=1)
+#     return xWy
 def link_prediction(model, user_pair):
     u1 = user_pair[0]
     u2 = user_pair[1]
     W = model.layers[5].get_weights()[0]
-    X = model.layers[3].get_weights()[0]
+    X = model.layers[1].get_weights()[0]
     x = X[u1]
     y = X[u2]
     xW = np.dot(x,W)
@@ -69,10 +88,11 @@ def PNRLR_Model(V, dim_embedddings=128):
     X_neg = shared_embedding(input_neg)
     Y = Embedding(V, output_dim=dim_embedddings, input_length=1)(context_input)
 
-    XY = merge([X_source, Y], mode='dot', dot_axes=2)
+    XY = dot([X_source, Y], axes=-1)
     res = Reshape((1,), input_shape=(1,1))(XY)
     nrl_output = Activation( activation='sigmoid', name='nrl_output')(res)
     model1 = Model(input=[input_source, context_input], output=[nrl_output])
+    # optimizer1 = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     optimizer1 = rmsprop()
     model1.compile(loss="binary_crossentropy", optimizer=optimizer1)
 
@@ -81,9 +101,9 @@ def PNRLR_Model(V, dim_embedddings=128):
     X_P = reshape_layer(X_pos)
     X_N = reshape_layer(X_neg)
     XW =  Dense(dim_embedddings, activation='linear', W_regularizer=l2(0.01), bias=False,name='BiW')(X_S)
-    pos_ouput = merge([XW, X_P], mode='dot')
-    neg_output = merge([XW, X_N], mode='dot')
-    lp_output = merge([pos_ouput, neg_output], mode='concat', concat_axis=-1, name='lp_output')
+    pos_ouput = dot([XW, X_P], axes=-1)
+    neg_output = dot([XW, X_N], axes=-1)
+    lp_output = concatenate([pos_ouput, neg_output], axis=-1, name='lp_output')
     model2 = Model(input=[input_source, input_pos, input_neg], output=[lp_output])
     optimizer2 = Adam()
     model2.compile(loss={'lp_output': ranking_loss_mm}, optimizer=optimizer2)
@@ -96,12 +116,12 @@ def hidden_edge_sampling(sample_iter, sample_size, edges, neighbor_set):
     ns = copy.deepcopy(neighbor_set)
     hi_ns = {}
     for e in hi_edges:
-        if hi_ns.has_key(e[0]):
+        if e[0] in hi_ns:
             hi_ns[e[0]].append(e[1])
         else:
             hi_ns[e[0]] = [e[1]]
         ns[e[0]].remove(e[1])
-        if hi_ns.has_key(e[1]):
+        if e[1] in hi_ns:
             hi_ns[e[1]].append(e[0])
         else:
             hi_ns[e[1]] = [e[0]]
@@ -129,7 +149,7 @@ def train_batch_generation(graph_nodes, ob_ns, hi_ns, neg_ns, gindex, ntable, nu
                 X1_input1.append(gindex[node])
                 X1_input2.append(neg[i])
                 Y1.append(0.)
-            if hi_ns.has_key(node):
+            if node in hi_ns:
                 hi_linked = gindex[random.choice(hi_ns[node])]
                 hi_nolinked = gindex[random.choice(neg_ns[node])]
                 X2_input1.append(gindex[node])
@@ -165,10 +185,12 @@ def train(config):
     dim_embedddings = config.dim_embedddings
     max_sample_iter = config.max_sample_iter
     max_train_iter = config.max_train_iter
+    p_threshold = config.p_threshold
     train_graph_file = config.train_graph_file
     val_pos_file = config.val_pos_file
     val_neg_file = config.val_neg_file
-
+    test_pos_file = config.test_pos_file
+    test_neg_file = config.test_neg_file
     # Read Data
     G = load_training_graph(train_graph_file, False)
     gindex = creat_index(G)
@@ -177,6 +199,7 @@ def train(config):
     ntable = NegTable(G, gindex)
     V = len(gindex) + 1
     X_val, Y_val = read_valset(val_pos_file, val_neg_file, gindex, False)
+    X_test, Y_test = read_valset(test_pos_file, test_neg_file, gindex, False)
 
     # Model initialization
     model1, model2 = PNRLR_Model(V, dim_embedddings)
@@ -186,11 +209,15 @@ def train(config):
     random.seed(seed)
     random.shuffle(edges)
 
-    sample_size = len(edges)/max_sample_iter
+    best_val_auc = 0
+    test_at_best_valid = 0 # validation for early stop
+    patience = 0 # Early stop patience
+
+    sample_size = int(len(edges)/max_sample_iter)
     for sample_iter in range(max_sample_iter):
         # Hidden edge sampling
         ob_edges, hi_edges, ob_ns, hi_ns = hidden_edge_sampling(sample_iter, sample_size, edges, ns_complete)
-        print 'Observed edges: %d, Hidden edges: %d' %(len(ob_edges), len(hi_edges))
+        print('Observed edges: %d, Hidden edges: %d' %(len(ob_edges), len(hi_edges)))
 
         # Training for the sampled hidden edges set and observed edges set
         for train_iter in range(max_train_iter):
@@ -202,11 +229,31 @@ def train(config):
                 loss1 += model1.train_on_batch(X1, Y1)
                 loss2 += model2.train_on_batch(X2, Y2)
             Y_pred = link_prediction(model2, X_val)
-            auc = roc_auc_score(Y_val, Y_pred)
+            val_auc = roc_auc_score(Y_val, Y_pred)
 
-            print 'Training Iteration: %d/%d, Sample Iteration: %d/%d'%(train_iter+1, max_train_iter,sample_iter+1, max_sample_iter)
-            print 'Loss1: %f, Loss2: %f'%(loss1, loss2)
-            print 'Link Prediction AUC on Validation: %f\n' %(auc)
+            Y_pred = link_prediction(model2, X_test)
+            test_auc = roc_auc_score(Y_test, Y_pred)
+
+            if val_auc > best_val_auc:
+                best_val_auc = val_auc
+                test_at_best_valid = test_auc
+                patience = 0
+            else:
+                patience += 1
+
+            print('Training Iteration: %d/%d, Sample Iteration: %d/%d'%(train_iter+1, max_train_iter,sample_iter+1, max_sample_iter) )
+            print('Loss1: %f, Loss2: %f, Val AUC: %f, Test AUC: %f'%(loss1, loss2, val_auc, test_auc))
+
+            if patience == p_threshold:
+                break;
+
+    print ('Best Val AUC: %f; Test AUC at best valid model: %f'% (best_val_auc, test_at_best_valid))
+
+    result_file = config.data_name + '_res.txt'
+    with open(result_file, 'a') as f:
+        # for res_auc in auc_list:
+        f.write('Test results at best valid of data ' + config.data_name  + ' : \n')
+        f.write('%.5f \n' %(test_at_best_valid,))
 
 
 if __name__ == '__main__':
