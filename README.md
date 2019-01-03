@@ -13,6 +13,9 @@ The code is only tested in the environment with following setting:
 &emsp;4. scikit-learn (0.16.1)  
 &emsp;5. networkx (1.10)  
 
+## Run the code
+    python pnrl_r.py
+
 ## Dataset
 All experimental datasets are public, you can find in the following links:
 * **Facebook**: J. McAuley and J. Leskovec. Learning to Discover Social Circles in Ego Networks. NIPS, 2012. https://snap.stanford.edu/data/egonets-Facebook.html
