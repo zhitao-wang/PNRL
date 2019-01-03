@@ -15,6 +15,9 @@ The code is only tested in the environment with following setting:
 
 ## Run the code
     python pnrl_r.py
+    
+## Configuration
+You can change the path of data, learning rate, batch size, sample ratio and other parameters at Class Config() in pnrl_r.py
 
 ## Dataset
 All experimental datasets are public, you can find in the following links:
