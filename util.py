@@ -72,7 +72,7 @@ def neighbor_set(G):
     print('Creating neighbor set...')
     for node in G.nodes():
         neighbours = nx.neighbors(G,node)
-        neighbor_set[node] = neighbours
+        neighbor_set[node] = list(neighbours)
         non_neighbor_set[node] = list(whole_set-set(neighbours))
     print('Finish creating neighbor set')
     return neighbor_set, non_neighbor_set
